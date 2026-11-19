@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weight Predictor</title>
+  <style>
+    body {
+      max-width: 420px;
+      margin: 50px auto;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    input, button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Weight Predictor</h1>
+
+  <label for="height">Enter your height (cm):</label>
+  <input id="height" type="number" min="1" placeholder="e.g. 175" />
+
+  <button onclick="predictWeight()">Predict weight</button>
+
+  <p id="result"></p>
+
+  <script>
+    // Example training data: [height in cm, weight in kg].
+    // Replace these examples with your actual dataset.
+    const trainingData = [
+      [150, 48],
+      [160, 55],
+      [170, 65],
+      [180, 75],
+      [190, 85]
+    ];
+
+    function trainLinearRegression(data) {
+      const n = data.length;
+      const meanHeight = data.reduce((sum, row) => sum + row[0], 0) / n;
+      const meanWeight = data.reduce((sum, row) => sum + row[1], 0) / n;
+
+      let numerator = 0;
+      let denominator = 0;
+
+      for (const [height, weight] of data) {
+        numerator += (height - meanHeight) * (weight - meanWeight);
+        denominator += (height - meanHeight) ** 2;
+      }
+
+      const slope = numerator / denominator;
+      const intercept = meanWeight - slope * meanHeight;
+
+      return { slope, intercept };
+    }
+
+    // Train once when the page loads.
+    const model = trainLinearRegression(trainingData);
+
+    function predictWeight() {
+      const height = Number(document.getElementById("height").value);
+      const result = document.getElementById("result");
+
+      if (!Number.isFinite(height) || height <= 0) {
+        result.textContent = "Please enter a valid height.";
+        return;
+      }
+
+      const predictedWeight = model.slope * height + model.intercept;
+      result.textContent = `Predicted weight: ${predictedWeight.toFixed(1)} kg`;
+    }
+  </script>
+</body>
+</html>
